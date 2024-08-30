@@ -262,7 +262,7 @@ void renderBevel1(bool interlaced,
     if (! (width > 2 && height > 2))
         return;
 
-    const size_t s = width * height;
+    const size_t s = static_cast<size_t>(width) * height;
     size_t i;
 
     // brighten top line and first pixel of the
@@ -307,7 +307,7 @@ void renderBevel2(bool interlaced,
     if (! (width > 4 && height > 4))
         return;
 
-    const size_t s = width * height;
+    const size_t s = static_cast<size_t>(width) * height;
     size_t i;
 
     // top line, but stop 2 pixels before right border
@@ -446,7 +446,7 @@ void renderRectangleGradient(bool interlaced,
 
             // check, if the point (x, y) is left or right of the vectors
             // 'a' and 'b'. if the point is on the same side for both 'a' and
-            // 'b' (sign(a.cross()) is equal to sign(b.cross())) then use the 
+            // 'b' (sign(a.cross()) is equal to sign(b.cross())) then use the
             // y_gradient, otherwise use x_gradient
 
             if (sign(a.cross(x, y)) * sign(b.cross(x, b.y + y)) < 0) {
@@ -488,7 +488,7 @@ void renderPipeCrossGradient(bool interlaced,
 
             // check, if the point (x, y) is left or right of the vectors
             // 'a' and 'b'. if the point is on the same side for both 'a' and
-            // 'b' (sign(a.cross()) is equal to sign(b.cross())) then use the 
+            // 'b' (sign(a.cross()) is equal to sign(b.cross())) then use the
             // x_gradient, otherwise use y_gradient
 
             if (sign(a.cross(x, y)) * sign(b.cross(x, b.y + y)) > 0) {
@@ -669,7 +669,7 @@ TextureRender::TextureRender(ImageControl &imgctrl,
     _FB_USES_NLS;
     // clamp to "normal" size
     if (width > texture_max_width) {
-        cerr<<"TextureRender: "<<_FBTK_CONSOLETEXT(Error, BigWidth, 
+        cerr<<"TextureRender: "<<_FBTK_CONSOLETEXT(Error, BigWidth,
                 "Warning! Width > 3200 setting Width = 3200", "Image width seems too big, clamping")
             <<endl;
         width = texture_max_width;
@@ -710,7 +710,7 @@ Pixmap TextureRender::render(const FbTk::Texture &texture) {
 
 void TextureRender::allocateColorTables() {
 
-    const size_t s = width * height;
+    const size_t s = static_cast<size_t>(width) * height;
     rgba = FB_new_nothrow RGBA[s];
     if (rgba == 0) {
 

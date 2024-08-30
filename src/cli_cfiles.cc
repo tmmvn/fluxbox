@@ -136,26 +136,33 @@ void FluxboxCli::updateConfigFilesIfNeeded(const std::string& rc_file) {
     if (!r_mgr.load(rc_file.c_str())) {
         _FB_USES_NLS;
         cerr << _FB_CONSOLETEXT(Fluxbox, CantLoadRCFile, "Failed to load database", "")
-            << ": " 
+            << ": "
             << rc_file << endl;
         return;
     }
 
     if (*c_version < CONFIG_VERSION) {
 
-        fbdbg << "updating config files from version " 
+        fbdbg << "updating config files from version "
             << *c_version
             << " to "
             << CONFIG_VERSION
             << endl;
 
-        string commandargs = realProgramName("fluxbox-update_configs");
-        commandargs += " -rc " + rc_file;
+        char *args[] = {"fluxbox-update_configs", "-rc", const_cast<char*>(rc_file.c_str()), NULL};
 
-        if (system(commandargs.c_str())) {
-            fbdbg << "running '" 
-                << commandargs
-                << "' failed." << endl;
+        pid_t pid = fork();
+        if (pid == 0) {
+            // Child process
+            if (execvp("fluxbox-update_configs", args) == -1) {
+                perror("execvp failed"); // Handle error
+                _exit(1);
+            }
+        } else if (pid > 0) {
+            // Parent process
+            wait(NULL); // Wait for child process to finish
+        } else {
+            perror("fork failed"); // Handle error
         }
 #ifdef HAVE_SYNC
         sync();

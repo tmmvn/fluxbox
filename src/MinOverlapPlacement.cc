@@ -145,7 +145,7 @@ bool MinOverlapPlacement::placeWindow(const FluxboxWindow &win, int head,
     for (; it != it_end; ++it) {
         if (*it == &win) continue;
         if ((*it)->layerNum() != win.layerNum() ){ continue; } //windows are in different layers - skip it
-        
+
         getWindowDimensions(*(*it), left, top, right, bottom);
 
         // go through the list of regions
@@ -193,13 +193,19 @@ bool MinOverlapPlacement::placeWindow(const FluxboxWindow &win, int head,
     }
 
     // choose the region with minimum overlap
-    int min_so_far = win_w * win_h * windowlist.size() + 1;
+    size_t min_so_far;
+    if (windowlist.size() > 0 &&
+        static_cast<size_t>(win_w) > (std::numeric_limits<size_t>::max() / (win_h * windowlist.size()))) {
+        min_so_far = std::numeric_limits<size_t>::max();
+    } else {
+        min_so_far = static_cast<size_t>(win_w) * win_h * windowlist.size() + 1;
+    }
     std::set<Area>::iterator min_reg = areas.end();
 
     std::set<Area>::iterator ar_it = areas.begin();
     for (; ar_it != areas.end(); ++ar_it) {
 
-        int overlap = 0;
+        size_t overlap = 0;
         it = const_windowlist.rbegin();
         for (; it != it_end; ++it) {
 
@@ -210,7 +216,14 @@ bool MinOverlapPlacement::placeWindow(const FluxboxWindow &win, int head,
             int min_bottom = std::min(bottom, ar_it->y + win_h);
             int max_left = std::max(left, ar_it->x);
             int max_top = std::max(top, ar_it->y);
-
+            int width_diff = min_right - max_left;
+            int height_diff = min_bottom - max_top;
+            if ((width_diff > 0) && (height_diff > 0) &&
+        (std::numeric_limits<size_t>::max() - overlap < static_cast<size_t>(width_diff) * height_diff)) {
+                overlap = std::numeric_limits<size_t>::max();
+            } else {
+                overlap += static_cast<size_t>(width_diff) * height_diff;
+            }
             // now compute the overlap and add to running total
             if (min_right > max_left && min_bottom > max_top)
                 overlap += (min_right - max_left) * (min_bottom - max_top);

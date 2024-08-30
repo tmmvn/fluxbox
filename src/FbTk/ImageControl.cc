@@ -119,7 +119,7 @@ void allocateUnallocatedColors(std::vector<XColor> colors, Display* dpy, Colorma
             unsigned long close = 0;
 
             // iterate over the indexed colors 'icolors' and find
-            // a close color. 
+            // a close color.
             //
             // 2 passes to improve the result of the first pass
 
@@ -476,12 +476,26 @@ void ImageControl::createColorTable() {
 
     case PseudoColor:
     case StaticColor: {
-
-        size_t num_colors = m_colors_per_channel * m_colors_per_channel * m_colors_per_channel;
+        size_t num_colors;
+        if(m_colors_per_channel > std::cbrt(std::numeric_limits<size_t>::max()))
+        {
+            num_colors = std:numeric_limits<size_t>::max();
+        }
+        else
+        {
+            num_colors = static_cast<size_t>(m_colors_per_channel) * m_colors_per_channel * m_colors_per_channel;
+        }
 
         if (num_colors > static_cast<unsigned>(1 << m_screen_depth)) {
             m_colors_per_channel = (1 << m_screen_depth) / 3;
-            num_colors = m_colors_per_channel * m_colors_per_channel * m_colors_per_channel;
+            if(m_colors_per_channel > std::cbrt(std::numeric_limits<size_t>::max()))
+            {
+                num_colors = std:numeric_limits<size_t>::max();
+            }
+            else
+            {
+                num_colors = static_cast<size_t>(m_colors_per_channel) * m_colors_per_channel * m_colors_per_channel;
+            }
         }
 
         if (m_colors_per_channel < 2 || num_colors > static_cast<unsigned>(1 << m_screen_depth)) {
@@ -524,11 +538,25 @@ void ImageControl::createColorTable() {
             if (visual()->c_class == StaticGray) {
                 num_colors = 1 << m_screen_depth;
             } else {
-                num_colors = m_colors_per_channel * m_colors_per_channel * m_colors_per_channel;
-
+                size_t num_colors;
+                if(m_colors_per_channel > std::cbrt(std::numeric_limits<size_t>::max()))
+                {
+                    num_colors = std:numeric_limits<size_t>::max();
+                }
+                else
+                {
+                    num_colors = static_cast<size_t>(m_colors_per_channel) * m_colors_per_channel * m_colors_per_channel;
+                }
                 if (num_colors > static_cast<unsigned>(1 << m_screen_depth)) {
                     m_colors_per_channel = (1 << m_screen_depth) / 3;
-                    num_colors = m_colors_per_channel * m_colors_per_channel * m_colors_per_channel;
+                    if(m_colors_per_channel > std::cbrt(std::numeric_limits<size_t>::max()))
+                    {
+                        num_colors = std:numeric_limits<size_t>::max();
+                    }
+                    else
+                    {
+                        num_colors = static_cast<size_t>(m_colors_per_channel) * m_colors_per_channel * m_colors_per_channel;
+                    }
                 }
             }
 
